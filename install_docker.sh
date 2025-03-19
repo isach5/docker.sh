@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Ensure the script is running as root
+# Ensure the script is running as root.
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root. Try running with: sudo $0"
   exit 1
@@ -10,8 +10,12 @@ fi
 echo "Removing any older versions of Docker..."
 apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
 
-echo "Updating package index and installing prerequisites..."
+echo "Updating package index and upgrading installed packages..."
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
+apt-get upgrade -y
+
+echo "Installing prerequisites..."
 apt-get install -y ca-certificates curl gnupg lsb-release
 
 echo "Adding Docker's official GPG key..."
@@ -29,7 +33,7 @@ apt-get update
 echo "Installing Docker Engine, CLI, Containerd, and Docker Compose plugin..."
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# Optionally add a user to the docker group to allow non-root usage
+# Optionally add a user to the docker group to allow non-root usage.
 read -p "Enter a username to add to the docker group (or press Enter to skip): " username
 if [ -n "$username" ]; then
   if id "$username" &>/dev/null; then
@@ -42,6 +46,7 @@ if [ -n "$username" ]; then
 fi
 
 echo "Docker and Docker Compose have been installed successfully."
+
 echo "-----------------------------------"
 echo "Verifying installation by showing versions:"
 echo "-----------------------------------"
