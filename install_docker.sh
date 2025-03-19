@@ -42,3 +42,11 @@ if [ -n "$username" ]; then
 fi
 
 echo "Docker and Docker Compose have been installed successfully."
+echo "-----------------------------------"
+echo "Verifying installation by showing versions:"
+echo "-----------------------------------"
+echo "Docker version:"
+docker --version
+
+echo "Docker Compose version:"
+docker compose version
