@@ -1,57 +1,57 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Ensure the script is running as root.
 if [ "$EUID" -ne 0 ]; then
-  echo "This script must be run as root. Try running with: sudo $0"
+  echo "❌ This script must be run as root. Try: sudo $0"
   exit 1
 fi
 
-echo "Removing any older versions of Docker..."
+echo "🚀 Starting Docker and Docker Compose installation..."
+
+echo "🧹 Removing any old Docker packages..."
 apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
 
-echo "Updating package index and upgrading installed packages..."
+echo "🔄 Updating package index..."
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
+apt-get update -y
 apt-get upgrade -y
 
-echo "Installing prerequisites..."
+echo "📦 Installing prerequisites..."
 apt-get install -y ca-certificates curl gnupg lsb-release
 
-echo "Adding Docker's official GPG key..."
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+DOCKER_KEYRING_PATH="/etc/apt/keyrings/docker.gpg"
+if [ ! -f "$DOCKER_KEYRING_PATH" ]; then
+  echo "🔑 Adding Docker's official GPG key..."
+  mkdir -p /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o "$DOCKER_KEYRING_PATH"
+else
+  echo "🔑 Docker GPG key already exists, skipping."
+fi
 
-echo "Setting up the Docker repository..."
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-| tee /etc/apt/sources.list.d/docker.list > /dev/null
+DOCKER_SOURCE_LIST="/etc/apt/sources.list.d/docker.list"
+DISTRO=$(lsb_release -cs)
+ARCH=$(dpkg --print-architecture)
+if [ ! -f "$DOCKER_SOURCE_LIST" ]; then
+  echo "📁 Setting up Docker repository for $DISTRO..."
+  echo "deb [arch=$ARCH signed-by=$DOCKER_KEYRING_PATH] https://download.docker.com/linux/ubuntu $DISTRO stable" > "$DOCKER_SOURCE_LIST"
+fi
 
-echo "Updating package index..."
-apt-get update
+apt-get update -y
 
-echo "Installing Docker Engine, CLI, Containerd, and Docker Compose plugin..."
+echo "⚙️ Installing Docker Engine and Compose plugin..."
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# Optionally add a user to the docker group to allow non-root usage.
-read -p "Enter a username to add to the docker group (or press Enter to skip): " username
+read -rp "👤 Enter a username to add to the 'docker' group (or press Enter to skip): " username
 if [ -n "$username" ]; then
   if id "$username" &>/dev/null; then
     usermod -aG docker "$username"
-    echo "User '$username' has been added to the docker group."
-    echo "Log out and log back in for the changes to take effect."
+    echo "✅ User '$username' added to the docker group. Please log out and back in."
   else
-    echo "User '$username' does not exist. Skipping user group modification."
+    echo "⚠️ User '$username' does not exist. Skipping group addition."
   fi
 fi
 
-echo "Docker and Docker Compose have been installed successfully."
-
-echo "-----------------------------------"
-echo "Verifying installation by showing versions:"
-echo "-----------------------------------"
-echo "Docker version:"
-docker --version
-
-echo "Docker Compose version:"
-docker compose version
+echo "✅ Docker installation completed!"
+echo "🔍 Verifying installed versions:"
+docker --version || echo "Docker not found"
+docker compose version || echo "Docker Compose not found"

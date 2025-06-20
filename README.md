@@ -1,6 +1,14 @@
-# Install docker with a simple .sh
+# Docker Install Script
 
-# How to Use This Script
+Quick script to install the latest Docker and Docker Compose plugin on Ubuntu.
+
+## Usage
+Run on terminal : 
+```bash
+curl -fsSL https://raw.githubusercontent.com/isach5/docker.sh/v2/install_docker.sh | sudo bash
+```
+
+# OR
 
 Save the Script:
 
@@ -15,3 +23,4 @@ sudo ./install_docker.sh
 Log Out/In (If User Group Was Modified):
 
 If you added a user to the Docker group, log out and back in so that group changes take effect.
+
