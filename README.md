@@ -5,7 +5,7 @@ Quick script to install the latest Docker and Docker Compose plugin on Ubuntu.
 ## Usage
 Run on terminal : 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/isach5/docker.sh/v2/install_docker.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/isach5/docker.sh/main/install_docker.sh | sudo bash
 ```
 
 # OR
